@@ -14,3 +14,7 @@ export interface IUser {
   age: number;
   address: IAddress;
 }
+
+export interface UserInstanceMethods {
+  hashPassword(password: string) : void
+}

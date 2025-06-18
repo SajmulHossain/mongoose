@@ -1,5 +1,5 @@
 import express, { Application, Request, Response } from "express";
-import { User } from "../models/users.moel";
+import { User } from "../models/users.model";
 import { z } from "zod";
 
 const app: Application = express();
@@ -40,7 +40,14 @@ userRoutes.post("/create-user", async (req: Request, res: Response) => {
   try {
     // const body = await CreateUserZodSchema.parseAsync(req.body);
     const body = req.body;
-    const user = await User.create(body);
+
+    // const user = await User.create(body);
+
+    const user = new User(body);
+
+    await user.hashPassword(body.password);
+
+    user.save();
 
     res.status(201).json({
       success: true,
