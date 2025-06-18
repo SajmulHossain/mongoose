@@ -5,25 +5,38 @@ const userSchema = new Schema<IUser>(
   {
     firstName: {
       type: String,
-      required: true,
+      required: [true, "First name not given"],
+      minlength: [5, "Minimum length 5. You gave {VALUE}"],
+      maxlength: [10, "Maximum length 10, You gave {VALUE}"],
     },
     lastName: {
       type: String,
       required: true,
+      minlength: [5, "Minimum length 5. You gave {VALUE}"],
+      maxlength: [10, "Maximum length 10, You gave {VALUE}"],
     },
     email: {
       type: String,
+      unique: [true, "The email: {VALUE} is already exist."],
       required: true,
-      trim: true,
       lowercase: true,
-      unique: true,
+      trim: true,
+      validate: {
+        validator: function(v) {
+          return /^\S+@\S+\.\S+$/.test(v);
+        },
+        message: props => `Email:${props.value} is not a valid email.`
+      }
     },
     password: {
       type: String,
     },
     role: {
       type: String,
-      enum: ["user", "admin"],
+      enum: {
+        values: ["user", "admin"],
+        message: "Role is not valid. Got {VALUE} is not valid"
+      },
       default: "user",
     },
   },
