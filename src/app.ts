@@ -5,47 +5,52 @@ const app: Application = express();
 
 app.use(express.json());
 
-const noteSchema = new Schema({
-  title: {
-    type: String,
-    required: true,
-    trim: true,
+const noteSchema = new Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    content: {
+      type: String,
+      default: "",
+    },
+    category: {
+      type: String,
+      enum: ["personal", "work", "study", "other"],
+      default: "personal",
+    },
+    pinned: {
+      type: Boolean,
+      default: false,
+    },
+    tags: {
+      label: { type: String, required: true },
+      color: { type: String, default: "gray" },
+    },
   },
-  content: {
-    type: String,
-    default: "",
-  },
-  category: {
-    type: String,
-    enum: ["personal", "work", "study", "other"],
-    default: "personal",
-  },
-  pinned: {
-    type: Boolean,
-    default: false,
-  },
-  tags: {
-    label: { type: String, required: true },
-    color: { type: String, default: "gray" },
-  },
-});
+  {
+    versionKey: false,
+    timestamps: true
+  }
+);
 
 const Note = model("Note", noteSchema);
 
 app.get("/notes", async (req: Request, res: Response) => {
-  
   const notes = await Note.find();
 
   res.status(200).json({
     success: true,
     message: "Note got successfully",
-    notes
+    notes,
   });
 });
 
 app.get("/notes/:id", async (req: Request, res: Response) => {
   const { id } = req.params;
-  
+
   const note = await Note.findById(id);
   // const note = await Note.findOne({ _id: id })
   // const note = await Note.findOne({ _id: new ObjectId(id) });
@@ -53,7 +58,7 @@ app.get("/notes/:id", async (req: Request, res: Response) => {
   res.status(200).json({
     success: true,
     message: "Note got successfully",
-    note
+    note,
   });
 });
 
@@ -63,7 +68,7 @@ app.post("/note/create-note", async (req: Request, res: Response) => {
   // ***** approach - 1 to creating data
   // const myNote = new Note({
   //   title: "Learning Express",
-  //   tags: { 
+  //   tags: {
   //     label: "database"
   //    }
   // });
@@ -76,7 +81,38 @@ app.post("/note/create-note", async (req: Request, res: Response) => {
   res.status(201).json({
     success: true,
     message: "Note created successfully",
-    note
+    note,
+  });
+});
+
+app.patch("/notes/:id", async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { body } = req;
+
+  const note = await Note.findByIdAndUpdate(id, body, { new: true });
+  // const note = await Note.updateOne({ _id: id }, body, { new: true });
+  // const note = await Note.findOneAndUpdate({ _id: id }, body, { new: true });
+  // const note = await Note.findOne({ _id: new ObjectId(id) });
+
+  res.status(200).json({
+    success: true,
+    message: "Note updated successfully",
+    note,
+  });
+});
+
+app.delete("/notes/:id", async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const note = await Note.findByIdAndDelete(id);
+  // const note = await Note.updateOne({ _id: id }, body, { new: true });
+  // const note = await Note.findOneAndUpdate({ _id: id });
+  // const note = await Note.findOne({ _id: new ObjectId(id) });
+
+  res.status(200).json({
+    success: true,
+    message: "Note updated successfully",
+    note,
   });
 });
 
