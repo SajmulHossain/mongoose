@@ -1,15 +1,24 @@
 import { model, Schema } from "mongoose";
-import { IAddress, IUser, UserInstanceMethods, UserStaticMethods } from "../interfaces/users.interface";
+import {
+  IAddress,
+  IUser,
+  UserInstanceMethods,
+  UserStaticMethods,
+} from "../interfaces/users.interface";
 import validator from "validator";
-import bcrypt from "bcryptjs"
+import bcrypt from "bcryptjs";
+import { Note } from "./notes.model";
 
-const addressSchema = new Schema<IAddress>({
-  city: { type: String },
-  street: { type: String },
-  zip: { type: Number },
-}, {
-  _id: false
-});
+const addressSchema = new Schema<IAddress>(
+  {
+    city: { type: String },
+    street: { type: String },
+    zip: { type: Number },
+  },
+  {
+    _id: false,
+  }
+);
 
 const userSchema = new Schema<IUser, UserStaticMethods, UserInstanceMethods>(
   {
@@ -55,7 +64,7 @@ const userSchema = new Schema<IUser, UserStaticMethods, UserInstanceMethods>(
       required: true,
     },
     address: {
-      type: addressSchema
+      type: addressSchema,
     },
   },
   {
@@ -64,18 +73,25 @@ const userSchema = new Schema<IUser, UserStaticMethods, UserInstanceMethods>(
   }
 );
 
-userSchema.method("hashPassword", async function(pass: string) {
+userSchema.method("hashPassword", async function (pass: string) {
   const password = await bcrypt.hash(pass, 10);
   this.password = password;
-})
+});
 
-userSchema.static("hashPassword", async function(pass: string) {
+userSchema.static("hashPassword", async function (pass: string) {
   const password = await bcrypt.hash(pass, 10);
   return password;
-})
+});
 
-userSchema.pre("save", async function() {
+userSchema.pre("save", async function () {
+  console.log(this);
   this.password = await bcrypt.hash(this.password, 10);
-})
+});
+
+userSchema.post("findOneAndDelete", async function (doc) {
+  if (doc) {
+    await Note.deleteMany({ user: doc._id });
+  }
+});
 
 export const User = model<IUser, UserStaticMethods>("User", userSchema);
