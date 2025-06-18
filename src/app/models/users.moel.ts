@@ -1,6 +1,14 @@
 import { model, Schema } from "mongoose";
-import { IUser } from "../interfaces/users.interface";
+import { IAddress, IUser } from "../interfaces/users.interface";
 import validator from "validator";
+
+const addressSchema = new Schema<IAddress>({
+  city: { type: String },
+  street: { type: String },
+  zip: { type: Number },
+}, {
+  _id: false
+});
 
 const userSchema = new Schema<IUser>(
   {
@@ -22,15 +30,13 @@ const userSchema = new Schema<IUser>(
       required: true,
       lowercase: true,
       trim: true,
-    //   validate: {
-    //     validator: function(v) {
-    //       return /^\S+@\S+\.\S+$/.test(v);
-    //     },
-    //     message: props => `Email:${props.value} is not a valid email.`
-    //   }
-    validate: [
-      validator.isEmail, "Invalid email: {VALUE}"
-    ]
+      //   validate: {
+      //     validator: function(v) {
+      //       return /^\S+@\S+\.\S+$/.test(v);
+      //     },
+      //     message: props => `Email:${props.value} is not a valid email.`
+      //   }
+      validate: [validator.isEmail, "Invalid email: {VALUE}"],
     },
     password: {
       type: String,
@@ -39,9 +45,16 @@ const userSchema = new Schema<IUser>(
       type: String,
       enum: {
         values: ["user", "admin"],
-        message: "Role is not valid. Got {VALUE} is not valid"
+        message: "Role is not valid. Got {VALUE} is not valid",
       },
       default: "user",
+    },
+    age: {
+      type: Number,
+      required: true,
+    },
+    address: {
+      type: addressSchema
     },
   },
   {

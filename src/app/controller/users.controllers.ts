@@ -11,7 +11,8 @@ const CreateUserZodSchema = z.object({
   lastName: z.string(),
   email: z.string(),
   password: z.string(),
-  role: z.string().optional()
+  role: z.string().optional(),
+  age: z.number()
 })
 
 userRoutes.get("/", async (req: Request, res: Response) => {
@@ -37,13 +38,14 @@ userRoutes.get("/:id", async (req: Request, res: Response) => {
 
 userRoutes.post("/create-user", async (req: Request, res: Response) => {
   try {
-    const body = await CreateUserZodSchema.parseAsync(req.body);
-    // const user = await User.create(body);
-console.log(body);
+    // const body = await CreateUserZodSchema.parseAsync(req.body);
+    const body = req.body;
+    const user = await User.create(body);
+
     res.status(201).json({
       success: true,
       message: "User created successfully",
-      // user,
+      user,
     });
   } catch (error:any) {
     res.status(201).json({
